@@ -10,12 +10,7 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
- * ClassName MybatisTest<br>
- * Function <br>
- *
- * @author 辛江勇
- * @version 1.0.0
- * @date 2020/2/18 13:50
+ * 测试用例，将整个工程串联起来
  */
 public class MybatisTest {
     public static void main(String[] args) throws IOException {
