@@ -1,7 +1,7 @@
 package com.mybatis.mybatis.util;
 
 
-import com.mybatis.mybatis.cfg.Mapper;
+import com.mybatis.mybatis.cfg.SqlMapper;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
@@ -17,13 +17,13 @@ import java.util.List;
  */
 public class Executor {
 
-    public <E> List<E> selectList(Mapper mapper, Connection conn) {
+    public <E> List<E> selectList(SqlMapper sqlMapper, Connection conn) {
         PreparedStatement pstm = null;
         ResultSet rs = null;
         try {
             //1.取出mapper中的数据
-            String queryString = mapper.getQueryString();
-            String resultType = mapper.getResultType();
+            String queryString = sqlMapper.getQueryString();
+            String resultType = sqlMapper.getResultType();
             Class domainClass = Class.forName(resultType);
             //2.获取PreparedStatement对象
             pstm = conn.prepareStatement(queryString);

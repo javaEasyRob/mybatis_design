@@ -1,7 +1,7 @@
 package com.mybatis.mybatis.proxy;
 
 
-import com.mybatis.mybatis.cfg.Mapper;
+import com.mybatis.mybatis.cfg.SqlMapper;
 import com.mybatis.mybatis.util.Executor;
 
 import java.lang.reflect.InvocationHandler;
@@ -14,21 +14,21 @@ import java.util.Map;
  */
 public class MapperProxy implements InvocationHandler {
 
-    private Map<String, Mapper> mappers;
+    private Map<String, SqlMapper> sqlMappers;
 
     private Connection connection;
 
-    public MapperProxy(Map<String, Mapper> mappers, Connection connection) {
-        this.mappers = mappers;
+    public MapperProxy(Map<String, SqlMapper> mappers, Connection connection) {
+        this.sqlMappers = mappers;
         this.connection = connection;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        //获取方法名和权限名，根据方法名得到Mapper对象
+        //获取方法名和全限名，根据方法名得到Mapper对象
         String methodName = method.getName();
         String className = method.getDeclaringClass().getName();
-        Mapper mapper = mappers.get(className + "." + methodName);
-        return new Executor().selectList(mapper, connection);
+        SqlMapper sqlMapper = sqlMappers.get(className + "." + methodName);
+        return new Executor().selectList(sqlMapper, connection);
     }
 }

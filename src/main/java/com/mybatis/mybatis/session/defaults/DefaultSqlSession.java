@@ -1,6 +1,6 @@
 package com.mybatis.mybatis.session.defaults;
 
-import com.mybatis.mybatis.cfg.Mapper;
+import com.mybatis.mybatis.cfg.SqlMapper;
 import com.mybatis.mybatis.proxy.MapperProxy;
 import com.mybatis.mybatis.session.SqlSession;
 
@@ -14,12 +14,12 @@ import java.util.Map;
 public class DefaultSqlSession implements SqlSession {
 
 
-   private Map<String, Mapper> mappers;
+   private Map<String, SqlMapper> sqlMappers;
 
     private Connection connection;
 
-    public DefaultSqlSession(Map<String, Mapper> mappers, Connection connection) {
-        this.mappers = mappers;
+    public DefaultSqlSession(Map<String, SqlMapper> mappers, Connection connection) {
+        this.sqlMappers = mappers;
         this.connection = connection;
     }
 
@@ -27,7 +27,7 @@ public class DefaultSqlSession implements SqlSession {
     public <T> T getMapper(Class<T> mapperClass) {
         return (T) Proxy.newProxyInstance(mapperClass.getClassLoader(),
                 new Class[]{mapperClass},
-                new MapperProxy(mappers, connection));
+                new MapperProxy(sqlMappers, connection));
     }
 
     @Override

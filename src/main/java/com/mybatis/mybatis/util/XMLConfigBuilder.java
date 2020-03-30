@@ -3,7 +3,7 @@ package com.mybatis.mybatis.util;
 
 import com.mybatis.mybatis.annotations.Select;
 import com.mybatis.mybatis.cfg.Configuration;
-import com.mybatis.mybatis.cfg.Mapper;
+import com.mybatis.mybatis.cfg.SqlMapper;
 import com.mybatis.mybatis.io.Resources;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
@@ -85,18 +85,18 @@ public class XMLConfigBuilder {
                     //取出属性的值
                     String mapperPath = attribute.getValue();
                     //把映射配置文件的内容获取出来，封装成一个map
-                    Map<String, Mapper> mappers = loadMapperConfiguration(mapperPath);
+                    Map<String, SqlMapper> sqlMappers = loadMapperConfiguration(mapperPath);
                     //给configuration中的mappers赋值
-                    cfg.setMappers(mappers);
+                    cfg.setMappers(sqlMappers);
                 } else {
                     System.out.println("使用的是注解");
                     //表示没有resource属性，用的是注解
                     //获取class属性的值
                     String maperClassPath = mapperElement.attributeValue("class");
                     //根据daoClassPath获取封装的必要信息
-                    Map<String, Mapper> mappers = loadMapperAnnotation(maperClassPath);
-                    //给configuration中的mappers赋值
-                    cfg.setMappers(mappers);
+                    Map<String, SqlMapper> sqlMappers = loadMapperAnnotation(maperClassPath);
+                    //给configuration中的mappers赋值，这里的set方法是putAll，追加进去，不要覆盖。
+                    cfg.setMappers(sqlMappers);
                 }
             }
             //返回Configuration
@@ -120,11 +120,11 @@ public class XMLConfigBuilder {
      * @return map中包含了获取的唯一标识（key是由Mapper接口的全限定类名和方法名组成）
      * 以及执行所需的必要信息（value是一个Mapper对象，里面存放的是执行的SQL语句和要封装的实体类全限定类名）
      */
-    private static Map<String, Mapper> loadMapperConfiguration(String mapperPath) throws IOException {
+    private static Map<String, SqlMapper> loadMapperConfiguration(String mapperPath) throws IOException {
         InputStream in = null;
         try {
             //定义返回值对象
-            Map<String, Mapper> mappers = new HashMap<>();
+            Map<String, SqlMapper> mappers = new HashMap<>();
             //1.根据路径获取字节输入流
             in = Resources.getResourceAsStream(mapperPath);
             //2.根据字节输入流获取Document对象
@@ -147,11 +147,11 @@ public class XMLConfigBuilder {
                 //创建Key
                 String key = namespace + "." + id;
                 //创建Value
-                Mapper mapper = new Mapper();
-                mapper.setQueryString(queryString);
-                mapper.setResultType(resultType);
+                SqlMapper sqlMapper = new SqlMapper();
+                sqlMapper.setQueryString(queryString);
+                sqlMapper.setResultType(resultType);
                 //把key和value存入mappers中
-                mappers.put(key, mapper);
+                mappers.put(key, sqlMapper);
             }
             return mappers;
         } catch (Exception e) {
@@ -168,9 +168,9 @@ public class XMLConfigBuilder {
      * @param mapperClassPath
      * @return
      */
-    private static Map<String, Mapper> loadMapperAnnotation(String mapperClassPath) throws Exception {
+    private static Map<String, SqlMapper> loadMapperAnnotation(String mapperClassPath) throws Exception {
         //定义返回值对象
-        Map<String, Mapper> mappers = new HashMap<>();
+        Map<String, SqlMapper> mappers = new HashMap<>();
         //1.得到dao接口的字节码对象
         Class daoClass = Class.forName(mapperClassPath);
         //2.得到dao接口中的方法数组
@@ -181,12 +181,12 @@ public class XMLConfigBuilder {
             boolean isAnnotated = method.isAnnotationPresent(Select.class);
             if (isAnnotated) {
                 //创建Mapper对象
-                Mapper mapper = new Mapper();
+                SqlMapper sqlMapper = new SqlMapper();
                 //取出注解的value属性值
                 Select selectAnno = method.getAnnotation(Select.class);
                 String queryString = selectAnno.value();
-                mapper.setQueryString(queryString);
-                //获取当前方法的返回值，还要求必须带有泛型信息
+                sqlMapper.setQueryString(queryString);
+                //获取当前方法的返回值，还要求必须带有泛型信息，取出具体要封装的对象
                 Type type = method.getGenericReturnType();//List<User>
                 //判断type是不是参数化的类型
                 if (type instanceof ParameterizedType) {
@@ -194,23 +194,22 @@ public class XMLConfigBuilder {
                     ParameterizedType ptype = (ParameterizedType) type;
                     //得到参数化类型中的实际类型参数
                     Type[] types = ptype.getActualTypeArguments();
-                    //取出第一个
+                    //取出第一个，User
                     Class domainClass = (Class) types[0];
                     //获取domainClass的类名
                     String resultType = domainClass.getName();
                     //给Mapper赋值
-                    mapper.setResultType(resultType);
+                    sqlMapper.setResultType(resultType);
                 }
                 //组装key的信息
                 //获取方法的名称
                 String methodName = method.getName();
                 String className = method.getDeclaringClass().getName();
                 String key = className + "." + methodName;
-                //给map赋值
-                mappers.put(key, mapper);
+                //给map赋值,
+                mappers.put(key, sqlMapper);
             }
         }
         return mappers;
     }
-
 }

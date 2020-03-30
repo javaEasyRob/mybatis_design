@@ -15,13 +15,13 @@ public class Configuration {
 
     private String username;
 
-    private Map<String, Mapper> mappers = new HashMap<>();
+    private Map<String, SqlMapper> mappers = new HashMap<>();
 
-    public Map<String, Mapper> getMappers() {
+    public Map<String, SqlMapper> getMappers() {
         return mappers;
     }
 
-    public void setMappers(Map<String, Mapper> mappers) {
+    public void setMappers(Map<String, SqlMapper> mappers) {
         this.mappers.putAll(mappers);
     }
 
