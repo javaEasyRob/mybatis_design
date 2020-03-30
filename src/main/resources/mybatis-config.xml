@@ -14,14 +14,16 @@
 
 
     <!--xml形式-->
-    <!--    <mappers>
+        <mappers>
              <mapper resource="com/mybatis/dao/UserMapper.xml"/>
-        </mappers>-->
+        </mappers>
 
 
     <!--注解形式-->
+<!--
     <mappers>
         <mapper class="com.mybatis.dao.IUserMapper"/>
     </mappers>
+-->
 
 </configuration>
